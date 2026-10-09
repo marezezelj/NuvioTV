@@ -309,6 +309,8 @@ fun PlayerScreen(
             returnToDetailsFromEndPrompt()
         } else if (uiState.error != null) {
             exitPlayerFromError()
+        } else if (uiState.showLocalSubtitleBrowser) {
+            viewModel.onEvent(PlayerEvent.OnDismissLocalSubtitleBrowser)
         } else if (uiState.showAudioOverlay || uiState.showSubtitleOverlay) {
             viewModel.onEvent(PlayerEvent.OnDismissTransientOverlay)
         } else if (uiState.showStreamInfoOverlay) {
@@ -1656,7 +1658,7 @@ fun PlayerScreen(
             visible = uiState.showSubtitleOverlay,
             internalTracks = uiState.subtitleTracks,
             selectedInternalIndex = uiState.selectedSubtitleTrackIndex,
-            addonSubtitles = uiState.addonSubtitles,
+            addonSubtitles = uiState.addonSubtitles + uiState.localSubtitles,
             selectedAddonSubtitle = uiState.selectedAddonSubtitle,
             subtitleStyle = uiState.subtitleStyle,
             subtitleDelayMs = uiState.subtitleDelayMs,
@@ -1667,11 +1669,21 @@ fun PlayerScreen(
             onInternalTrackSelected = { viewModel.onEvent(PlayerEvent.OnSelectSubtitleTrack(it)) },
             onAddonSubtitleSelected = { viewModel.onEvent(PlayerEvent.OnSelectAddonSubtitle(it)) },
             onDisableSubtitles = { viewModel.onEvent(PlayerEvent.OnDisableSubtitles) },
+            onBrowseLocalSubtitle = { viewModel.onEvent(PlayerEvent.OnOpenLocalSubtitleBrowser) },
             onEvent = { viewModel.onEvent(it) },
             onDismiss = { viewModel.onEvent(PlayerEvent.OnDismissTransientOverlay) },
             modifier = Modifier
                 .fillMaxSize()
                 .zIndex(2.6f)
+        )
+
+        LocalSubtitleBrowser(
+            visible = uiState.showLocalSubtitleBrowser,
+            onFileChosen = { viewModel.onEvent(PlayerEvent.OnLocalSubtitleFileChosen(it)) },
+            onDismiss = { viewModel.onEvent(PlayerEvent.OnDismissLocalSubtitleBrowser) },
+            modifier = Modifier
+                .fillMaxSize()
+                .zIndex(2.7f)
         )
 
         PlayerOverlayScaffold(

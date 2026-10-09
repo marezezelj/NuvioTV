@@ -105,6 +105,8 @@ data class PlayerUiState(
     val isCenterMixAvailable: Boolean = false,
     val showAudioOverlay: Boolean = false,
     val showSubtitleOverlay: Boolean = false,
+    val showLocalSubtitleBrowser: Boolean = false,
+    val localSubtitles: List<Subtitle> = emptyList(),
     val showSubtitleStylePanel: Boolean = false,
     val showSubtitleTimingDialog: Boolean = false,
     val showSubtitleDelayOverlay: Boolean = false,
@@ -289,6 +291,9 @@ sealed class PlayerEvent {
     data class OnSelectSubtitleTrack(val index: Int) : PlayerEvent()
     data object OnDisableSubtitles : PlayerEvent()
     data class OnSelectAddonSubtitle(val subtitle: Subtitle) : PlayerEvent()
+    data object OnOpenLocalSubtitleBrowser : PlayerEvent()
+    data object OnDismissLocalSubtitleBrowser : PlayerEvent()
+    data class OnLocalSubtitleFileChosen(val path: String) : PlayerEvent()
     data class OnSetPlaybackSpeed(val speed: Float) : PlayerEvent()
     data object OnToggleControls : PlayerEvent()
     data object OnShowAudioOverlay : PlayerEvent()

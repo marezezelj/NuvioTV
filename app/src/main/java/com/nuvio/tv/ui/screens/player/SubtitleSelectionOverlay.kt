@@ -75,6 +75,7 @@ import com.nuvio.tv.ui.screens.player.autosync.AutoSyncedChip
 
 private const val SubtitleOffLanguageKey = "__off__"
 private const val SubtitleUnknownLanguageKey = "__unknown__"
+private const val SubtitleLocalFileKey = "__local_file__"
 private const val SubtitleFocusTag = "SubtitleFocus"
 
 private val OverlayTextColors = listOf(
@@ -111,10 +112,12 @@ internal fun SubtitleSelectionOverlay(
     onInternalTrackSelected: (Int) -> Unit,
     onAddonSubtitleSelected: (Subtitle) -> Unit,
     onDisableSubtitles: () -> Unit,
+    onBrowseLocalSubtitle: () -> Unit,
     onEvent: (PlayerEvent) -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val fromDeviceLabel = stringResource(R.string.subtitle_from_device)
     val noneLabel = stringResource(R.string.subtitle_none)
     val unknownLabel = stringResource(R.string.subtitle_language_unknown)
     val builtInLabel = stringResource(R.string.subtitle_built_in)
@@ -137,7 +140,7 @@ internal fun SubtitleSelectionOverlay(
         )
     }
     val languageItems = remember(visible, sessionAddonSubtitles) {
-        buildSubtitleLanguageRailItems(
+        (buildSubtitleLanguageRailItems(
             internalTracks = sessionInternalTracks,
             addonSubtitles = sessionAddonSubtitles,
             preferredLanguage = sessionPreferredLanguage,
@@ -146,7 +149,7 @@ internal fun SubtitleSelectionOverlay(
             currentLanguageKey = sessionSelectedSubtitleLanguageKey,
             noneLabel = noneLabel,
             unknownLabel = unknownLabel
-        )
+        ) + SubtitleLanguageRailItem(key = SubtitleLocalFileKey, label = fromDeviceLabel, count = 0))
     }
     val sessionInitialLanguageKey = remember(visible, languageItems, sessionSelectedSubtitleLanguageKey) {
         sessionSelectedSubtitleLanguageKey.takeIf { key -> languageItems.any { it.key == key } }
@@ -495,7 +498,11 @@ internal fun SubtitleSelectionOverlay(
                         pendingLanguageFocusKey = null
                     },
                     onMoveRight = if (optionRailVisible && subtitleOptions.isNotEmpty()) ::moveFocusToOptionRail else null,
-                    onLanguageSelected = { languageKey ->
+                    onLanguageSelected = onLanguageSelected@{ languageKey ->
+                        if (languageKey == SubtitleLocalFileKey) {
+                            onBrowseLocalSubtitle()
+                            return@onLanguageSelected
+                        }
                         Log.d(
                             SubtitleFocusTag,
                             "language_select key=$languageKey previous=$selectedLanguageKey"
@@ -530,7 +537,12 @@ internal fun SubtitleSelectionOverlay(
                             )
                         }
                     },
-                    onLanguageFocused = { key ->
+                    onLanguageFocused = onLanguageFocused@{ key ->
+                        if (key == SubtitleLocalFileKey) {
+                            activeRail = OverlayFocusRail.LANGUAGE
+                            activeStyleFocusKey = null
+                            return@onLanguageFocused
+                        }
                         lastFocusedLanguageKey = key
                         optionEntryLanguageKey = key
                         activeRail = OverlayFocusRail.LANGUAGE

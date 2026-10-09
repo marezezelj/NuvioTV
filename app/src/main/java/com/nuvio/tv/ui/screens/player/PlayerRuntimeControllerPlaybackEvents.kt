@@ -1587,9 +1587,26 @@ fun PlayerRuntimeController.onEvent(event: PlayerEvent) {
         is PlayerEvent.OnSourceStreamSelected -> {
             switchToSourceStream(event.stream)
         }
+        PlayerEvent.OnOpenLocalSubtitleBrowser -> {
+            _uiState.update { it.copy(showLocalSubtitleBrowser = true) }
+        }
+        PlayerEvent.OnDismissLocalSubtitleBrowser -> {
+            _uiState.update { it.copy(showLocalSubtitleBrowser = false) }
+        }
+        is PlayerEvent.OnLocalSubtitleFileChosen -> {
+            val subtitle = buildLocalSubtitle(event.path)
+            _uiState.update { state ->
+                state.copy(
+                    showLocalSubtitleBrowser = false,
+                    localSubtitles = state.localSubtitles.filterNot { it.url == subtitle.url } + subtitle
+                )
+            }
+            onEvent(PlayerEvent.OnSelectAddonSubtitle(subtitle))
+        }
         PlayerEvent.OnDismissTransientOverlay -> {
             _uiState.update {
                 it.copy(
+                    showLocalSubtitleBrowser = false,
                     showAudioOverlay = false,
                     showSubtitleOverlay = false,
                     showSubtitleStylePanel = false,
