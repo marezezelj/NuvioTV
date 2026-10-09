@@ -120,6 +120,7 @@ internal fun SubtitleSelectionOverlay(
     val fromDeviceLabel = stringResource(R.string.subtitle_from_device)
     val noneLabel = stringResource(R.string.subtitle_none)
     val unknownLabel = stringResource(R.string.subtitle_language_unknown)
+    val localFileLabel = stringResource(R.string.subtitle_local_file)
     val builtInLabel = stringResource(R.string.subtitle_built_in)
     val forcedLabel = stringResource(R.string.sub_forced_lang)
     var persistedStyleFocusKey by rememberSaveable { mutableStateOf<String?>(null) }
@@ -148,7 +149,8 @@ internal fun SubtitleSelectionOverlay(
             showOnlyPreferredLanguages = sessionShowOnlyPreferredLanguages,
             currentLanguageKey = sessionSelectedSubtitleLanguageKey,
             noneLabel = noneLabel,
-            unknownLabel = unknownLabel
+            unknownLabel = unknownLabel,
+            localFileLabel = localFileLabel
         ) + SubtitleLanguageRailItem(key = SubtitleLocalFileKey, label = fromDeviceLabel, count = 0))
     }
     val sessionInitialLanguageKey = remember(visible, languageItems, sessionSelectedSubtitleLanguageKey) {
@@ -176,7 +178,8 @@ internal fun SubtitleSelectionOverlay(
             installedAddonOrder = sessionInstalledSubtitleAddonOrder,
             selectedOptionId = activeSelectedOptionId,
             builtInLabel = builtInLabel,
-            forcedLabel = forcedLabel
+            forcedLabel = forcedLabel,
+            localFileLabel = localFileLabel
         )
     }
 
@@ -1793,7 +1796,8 @@ private fun buildSubtitleLanguageRailItems(
     showOnlyPreferredLanguages: Boolean,
     currentLanguageKey: String,
     noneLabel: String,
-    unknownLabel: String
+    unknownLabel: String,
+    localFileLabel: String
 ): List<SubtitleLanguageRailItem> {
     val counts = linkedMapOf<String, Int>()
     internalTracks.forEach { track ->
@@ -1832,7 +1836,7 @@ private fun buildSubtitleLanguageRailItems(
         .map { (key, count) ->
             SubtitleLanguageRailItem(
                 key = key,
-                label = subtitleLanguageLabel(key, unknownLabel),
+                label = subtitleLanguageLabel(key, unknownLabel, localFileLabel),
                 count = count
             )
         }
@@ -1871,7 +1875,8 @@ private fun buildSubtitleOptionRailItems(
     installedAddonOrder: List<String>,
     selectedOptionId: String?,
     builtInLabel: String,
-    forcedLabel: String
+    forcedLabel: String,
+    localFileLabel: String
 ): List<SubtitleOptionRailItem> {
     if (selectedLanguageKey == SubtitleOffLanguageKey) return emptyList()
 
@@ -1883,6 +1888,8 @@ private fun buildSubtitleOptionRailItems(
             kind = SubtitleOptionKind.ADDON,
             title = if (subtitle.isStreamProvided) {
                 streamProvidedSubtitleTitle(subtitle)
+            } else if (subtitle.lang == LOCAL_SUBTITLE_UNKNOWN_LANG) {
+                localFileLabel
             } else {
                 Subtitle.languageCodeToName(PlayerSubtitleUtils.normalizeLanguageCode(subtitle.lang))
             },
@@ -2018,8 +2025,9 @@ private fun normalizeOverlayLanguageKeyForTrack(track: TrackInfo): String {
     }
 }
 
-private fun subtitleLanguageLabel(key: String, unknownLabel: String): String {
+private fun subtitleLanguageLabel(key: String, unknownLabel: String, localFileLabel: String): String {
     return when (key) {
+        LOCAL_SUBTITLE_UNKNOWN_LANG -> localFileLabel
         SubtitleOffLanguageKey -> Subtitle.languageCodeToName("none")
         SubtitleUnknownLanguageKey -> unknownLabel
         else -> Subtitle.languageCodeToName(key)
@@ -2027,6 +2035,7 @@ private fun subtitleLanguageLabel(key: String, unknownLabel: String): String {
 }
 
 private fun subtitleLanguageSortLabel(key: String): String = when (key) {
+    LOCAL_SUBTITLE_UNKNOWN_LANG -> "\uFFFE"
     SubtitleUnknownLanguageKey -> "\uFFFF"
     SubtitleOffLanguageKey -> Subtitle.languageCodeToName("none").lowercase()
     else -> Subtitle.languageCodeToName(key).lowercase()

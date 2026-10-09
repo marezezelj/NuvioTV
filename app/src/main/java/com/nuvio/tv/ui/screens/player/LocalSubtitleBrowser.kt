@@ -200,7 +200,7 @@ internal fun LocalSubtitleBrowser(
                     modifier = Modifier.fillMaxWidth().padding(end = 0.dp)
                 ) {
                     items(items = entries, key = { it.file?.absolutePath + "|" + it.isParent }) { entry ->
-                        val isFirst = entry === entries.first()
+                        val isFirst = entry === (entries.firstOrNull { !it.isParent } ?: entries.first())
                         BrowserCard(
                             label = if (entry.isDirectory && !entry.isParent) "${entry.label}/" else entry.label,
                             modifier = if (isFirst) Modifier.focusRequester(firstItemRequester) else Modifier,

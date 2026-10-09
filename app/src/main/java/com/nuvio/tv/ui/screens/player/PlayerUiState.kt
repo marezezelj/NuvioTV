@@ -230,7 +230,11 @@ data class PlayerUiState(
     // from loading overlay, rebuffering indicator, and corner overlay.
     val hideTorrentStats: Boolean = true,
     val isLive: Boolean = false
-)
+) {
+    /** Addon subtitles plus subtitles picked from device storage. */
+    val selectableAddonSubtitles: List<Subtitle>
+        get() = addonSubtitles + localSubtitles
+}
 
 data class PlaybackTimelineState(
     val currentPosition: Long = 0L,

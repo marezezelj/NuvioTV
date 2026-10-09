@@ -1934,6 +1934,7 @@
     <string name="subtitle_delay_reset">Reset</string>
     <string name="subtitle_none">None</string>
     <string name="subtitle_local_source">Device</string>
+    <string name="subtitle_local_file">Local file</string>
     <string name="subtitle_from_device">From device</string>
     <string name="subtitle_browser_title">Select subtitle file</string>
     <string name="subtitle_browser_empty">No subtitle files in this folder</string>

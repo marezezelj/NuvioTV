@@ -1655,10 +1655,11 @@ fun PlayerScreen(
         )
 
         SubtitleSelectionOverlay(
-            visible = uiState.showSubtitleOverlay,
+            // Hidden while the file browser is open; reopening rebuilds it around the new selection.
+            visible = uiState.showSubtitleOverlay && !uiState.showLocalSubtitleBrowser,
             internalTracks = uiState.subtitleTracks,
             selectedInternalIndex = uiState.selectedSubtitleTrackIndex,
-            addonSubtitles = uiState.addonSubtitles + uiState.localSubtitles,
+            addonSubtitles = uiState.selectableAddonSubtitles,
             selectedAddonSubtitle = uiState.selectedAddonSubtitle,
             subtitleStyle = uiState.subtitleStyle,
             subtitleDelayMs = uiState.subtitleDelayMs,
